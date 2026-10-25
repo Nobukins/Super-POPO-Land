@@ -92,6 +92,15 @@
       pipe: "#7a5ac0", pipeDark: "#3a2070", pipeLight: "#c8b0ff",
       lift: "#c0c0c8", liftDark: "#5a5a68",
     },
+    space: {
+      bands: ["#05030f", "#080520", "#0c072a", "#120a36", "#180e40"],
+      ground: "#5a5a8a", groundDark: "#363660", groundLight: "#8a8ab8",
+      top: "#9a7ae0", topDark: "#5a40a0", topLight: "#d8c0ff",
+      brick: "#5a4a9a", brickDark: "#1a1440", brickLight: "#9a8ad8",
+      hard: "#6a6a7a", hardDark: "#34343e", hardLight: "#a8a8b8",
+      pipe: "#3ab0b0", pipeDark: "#146060", pipeLight: "#a0f0f0",
+      lift: "#c0c0c8", liftDark: "#5a5a68",
+    },
   };
 
   // ---------------------------------------------------------------- tiles
@@ -420,7 +429,7 @@
       layers.push({ c: islandsLayer(), par: 0.1, y: 60 });
       layers.push({ c: cloudsLayer("#ffffff", "#e0f0ff", 7, 5, 100), par: 0.25, y: 100 });
       layers.push({ c: cloudsLayer("#f4faff", "#d0e6ff", 4, 9), par: 0.45, y: 10 });
-    } else {
+    } else if (themeName === "castle") {
       layers.push({ c: castleLayer(), par: 0.4, y: 0 });
     }
     return { bands: th.bands, layers };

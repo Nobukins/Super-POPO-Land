@@ -269,7 +269,9 @@
     { name: "1-1", title: "POPO HILLS", theme: "grass", width: 216, time: 400, music: "grass", build: level1 },
     { name: "1-2", title: "CRYSTAL CAVE", theme: "cave", width: 188, time: 400, music: "cave", build: level2 },
     { name: "1-3", title: "CLOUD WALK", theme: "sky", width: 182, time: 300, music: "sky", build: level3 },
-    { name: "1-4", title: "POPO CASTLE", theme: "castle", width: 194, time: 400, music: "castle", build: level4 },
+    // UFO に乗ってシューティング (中身は js/shooter.js)
+    { name: "1-4", title: "UFO ATTACK", theme: "space", kind: "shooter", width: 24, time: 0, music: "space", build: (b) => { b.start = { x: 11, y: 10 }; } },
+    { name: "1-5", title: "POPO CASTLE", theme: "castle", width: 194, time: 400, music: "castle", build: level4 },
   ];
 
   function buildLevel(index) {
@@ -282,6 +284,7 @@
       index,
       name: def.name,
       title: def.title,
+      kind: def.kind || "platform",
       theme: def.theme,
       music: def.music,
       time: def.time,

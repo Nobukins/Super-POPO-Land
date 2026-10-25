@@ -6,6 +6,7 @@
   const Snd = window.PopoAudio;
   const Input = window.PopoInput;
   const Levels = window.PopoLevels;
+  const Shooter = window.PopoShooter;
   const { T, TILE, SOLID } = A;
 
   const W = 384;
@@ -151,7 +152,28 @@
     player = makePlayer(sx + 2, (lv.start.y + 2) * TILE - PLAYER_H);
     if (fromCheckpoint && game.checkpoint !== null) player.y = 12 * TILE - PLAYER_H;
     L.cam = clampCam(player.x - W * 0.4);
+    if (L.kind === "shooter") {
+      // シューティングではポポは UFO に乗るので、通常のプレイヤーは使わない
+      player.hidden = true;
+      Shooter.init(L, shooterApi, fromCheckpoint && game.checkpoint !== null ? game.checkpoint : 0);
+    }
   }
+
+  const shooterApi = {
+    addScore: (n, x, y) => addScore(n, x, y),
+    die: () => die(),
+    clear: () => {
+      game.mode = "goal";
+      game.goalPhase = "tally";
+      game.modeTime = 0;
+      L.timeLeft = 0;
+      Snd.stopMusic();
+      Snd.play("clear");
+    },
+    setCheckpoint: (wave) => { game.checkpoint = wave; },
+    play: (name) => Snd.play(name),
+    music: (name) => Snd.playMusic(name),
+  };
 
   function makePlayer(x, y) {
     return {
@@ -890,6 +912,7 @@
       game.paused = !game.paused;
       Snd.play("pause");
       if (game.paused) Snd.stopMusic();
+      else if (L.kind === "shooter" && Shooter.state.boss) Snd.playMusic("boss");
       else Snd.playMusic(player.star > 0 ? "star" : L.music);
     }
     if (game.paused) return;
@@ -911,6 +934,11 @@
         }
         break;
       case "play":
+        if (L.kind === "shooter") {
+          Shooter.update(dt, "play");
+          updateParticles(dt);
+          break;
+        }
         updateLifts(dt);
         updatePlayer(dt);
         if (game.mode === "play") {
@@ -922,6 +950,7 @@
         updateCamera();
         break;
       case "dying":
+        if (L.kind === "shooter") Shooter.update(dt, "dying");
         if (game.modeTime > 0.5) {
           player.vy += 1300 * dt;
           player.y += player.vy * dt;
@@ -940,6 +969,7 @@
         }
         break;
       case "goal":
+        if (L.kind === "shooter") Shooter.update(dt, "goal");
         updateLifts(dt);
         updateEnemies(dt);
         updateParticles(dt);
@@ -1223,9 +1253,15 @@
     A.drawText(ctx, "×" + pad(game.coins, 2), 132, 18, "#ffffff", sh);
     A.drawText(ctx, "WORLD", 206, 8, "#ffffff", sh);
     A.drawText(ctx, L.name, 212, 18, "#ffffff", sh);
-    A.drawText(ctx, "TIME", 312, 8, "#ffffff", sh);
-    const tcol = L.timeLeft <= 100 && Math.floor(game.frame / 15) % 2 === 0 ? "#ff6a6a" : "#ffffff";
-    A.drawText(ctx, pad(L.timeLeft, 3), 318, 18, tcol, sh);
+    if (L.kind === "shooter") {
+      const info = Shooter.hud();
+      A.drawText(ctx, info.label, 312, 8, "#ffffff", sh);
+      A.drawText(ctx, info.value, 318, 18, "#ffffff", sh);
+    } else {
+      A.drawText(ctx, "TIME", 312, 8, "#ffffff", sh);
+      const tcol = L.timeLeft <= 100 && Math.floor(game.frame / 15) % 2 === 0 ? "#ff6a6a" : "#ffffff";
+      A.drawText(ctx, pad(L.timeLeft, 3), 318, 18, tcol, sh);
+    }
     // 残機
     const icon = A.popoFrame("idle", "normal", null, false);
     ctx.drawImage(icon, 0, 0, 32, 32, 60, 5, 12, 12);
@@ -1234,6 +1270,11 @@
   }
 
   function drawWorld() {
+    if (L.kind === "shooter") {
+      Shooter.draw(ctx, game.frame);
+      drawParticles();
+      return;
+    }
     drawBackground();
     drawDeco();
     drawTiles();
@@ -1269,7 +1310,7 @@
       A.drawText(ctx, matchMedia("(pointer: coarse)").matches ? "TAP A TO START" : "PRESS SPACE / ENTER", W / 2, 160, "#ffffff", o);
     }
     A.drawText(ctx, "HI " + pad(hiScore, 6), W / 2, 178, "#ffd23a", o);
-    A.drawText(ctx, "4 STAGES: HILLS CAVE SKY CASTLE", W / 2, 204, "#ffffff", o);
+    A.drawText(ctx, "5 STAGES: HILLS CAVE SKY UFO CASTLE", W / 2, 204, "#ffffff", o);
   }
 
   function drawIntro() {
@@ -1280,7 +1321,8 @@
     A.drawText(ctx, L.title, W / 2, 86, "#ffd23a", o);
     ctx.drawImage(A.popoFrame("idle"), W / 2 - 40, 108);
     A.drawText(ctx, "×  " + game.lives, W / 2 + 14, 122, "#ffffff", o);
-    if (game.checkpoint !== null) A.drawText(ctx, "CHECKPOINT", W / 2, 160, "#9aff6a", o);
+    if (game.checkpoint !== null) A.drawText(ctx, L.kind === "shooter" ? "FROM BOSS" : "CHECKPOINT", W / 2, 160, "#9aff6a", o);
+    if (L.kind === "shooter") A.drawText(ctx, "RIDE THE UFO!  MOVE: L/R  SHOOT: A/SPACE", W / 2, 144, "#6af0ff", o);
     A.drawText(ctx, "SCORE " + pad(game.score, 6), W / 2, 190, "#ffffff", o);
   }
 
@@ -1326,7 +1368,7 @@
     if (game.mode === "play" && game.modeTime < 1.2) {
       A.drawText(ctx, L.title, W / 2, 48, "#ffffff", { align: "center", outline: A.OUTLINE });
     }
-    if (game.mode === "goal" && game.goalPhase === "tally") {
+    if (game.mode === "goal" && game.goalPhase === "tally" && L.kind !== "shooter") {
       A.drawText(ctx, "COURSE CLEAR!", W / 2, 64, "#ffd23a", { align: "center", outline: A.OUTLINE, scale: 2 });
     }
   }

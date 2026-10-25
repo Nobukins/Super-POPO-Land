@@ -114,6 +114,15 @@
     check() { seq(["C6", "E6", "G6", "C7"], 0.07, "square", 0.2); },
     hurry() { seq(["C6", "G5", "C6", "G5", "C6", "G5"], 0.07, "square", 0.2); },
     tick() { tone("square", 1760, ac.currentTime, 0.02, 0.12, sfxGain); },
+    shoot() { tone("square", 1200, ac.currentTime, 0.08, 0.14, sfxGain, 500); },
+    laser() { tone("sawtooth", 500, ac.currentTime, 0.12, 0.08, sfxGain, 160); },
+    explode() {
+      const t = ac.currentTime;
+      noise(t, 0.5, 0.5, sfxGain, 200);
+      tone("triangle", 180, t, 0.4, 0.4, sfxGain, 40);
+    },
+    march1() { tone("triangle", 98, ac.currentTime, 0.07, 0.35, sfxGain); },
+    march2() { tone("triangle", 87, ac.currentTime, 0.07, 0.35, sfxGain); },
   };
 
   // ------------------------------------------------------------- BGM (すべてオリジナル曲)
@@ -156,6 +165,19 @@
       lead: "C6 . C6 . C6 . D6 C6 . C6 . D6 C6 . E6 . B5 . B5 . B5 . C6 B5 . B5 . C6 B5 . D6 .",
       bass: "C3 C4 C3 C4 C3 C4 C3 C4 C3 C4 C3 C4 C3 C4 C3 C4 G2 G3 G2 G3 G2 G3 G2 G3 G2 G3 G2 G3 G2 G3 G2 G3",
       drums: "k h s h k h s h",
+    },
+    space: {
+      bpm: 150,
+      lead: "E5 . B4 . E5 G5 F#5 E5 D5 . A4 . D5 F#5 E5 D5 C5 . G4 . C5 E5 D5 C5 B4 - - . D#5 - - . " +
+        "E5 G5 B5 G5 E5 G5 B5 G5 D5 F#5 A5 F#5 D5 F#5 A5 F#5 C5 E5 G5 E5 C5 E5 A5 G5 F#5 - D#5 - B4 - - .",
+      bass: "E2 E3 E2 E3 E2 E3 E2 E3 D2 D3 D2 D3 D2 D3 D2 D3 C2 C3 C2 C3 C2 C3 C2 C3 B1 B2 B1 B2 B1 B2 B1 B2",
+      drums: "k h s h k k s h",
+    },
+    boss: {
+      bpm: 170,
+      lead: "E5 F5 E5 D#5 E5 . B4 . C5 C#5 C5 B4 C5 . G4 . A4 Bb4 A4 G#4 A4 . E5 . F#5 - D#5 - B4 - - .",
+      bass: "E2 E2 E3 E2 E2 E2 E3 E2 C2 C2 C3 C2 C2 C2 C3 C2 A1 A1 A2 A1 A1 A1 A2 A1 B1 B1 B2 B1 B1 B1 B2 B1",
+      drums: "k h s h k s s h",
     },
     title: {
       bpm: 128,
