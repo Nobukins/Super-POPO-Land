@@ -1,0 +1,38 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(#8fd3ff, #4fa5ea);
+  color: #fff;
+}
+
+.app {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+}
+
+.instructions {
+  margin: 0 0 0.75rem;
+}
+
+#game {
+  width: 100%;
+  max-width: 960px;
+  border: 3px solid #1d3354;
+  border-radius: 8px;
+  background: #80d2ff;
+  image-rendering: pixelated;
+}
+
+.status {
+  margin: 0.75rem 0 0;
+  font-weight: 700;
+}
