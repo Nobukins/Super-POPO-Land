@@ -2,17 +2,61 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Super POPO Land - Prototype</title>
-  <link rel="stylesheet" href="./style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#1a1030" />
+  <title>Super POPO Land</title>
+  <meta name="description" content="ピンクのひとつ目モンスター「ポポ」が冒険する 8bit 風アクションゲーム" />
+  <link rel="icon" href="assets/favicon.png" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="app">
-    <h1>Super POPO Land (Prototype)</h1>
-    <p class="instructions">← → で移動 / Space でジャンプ。旗に到達するとクリア。</p>
-    <canvas id="game" width="960" height="540" aria-label="Super POPO Land game canvas"></canvas>
-    <p id="status" class="status" aria-live="polite">ステージ開始！</p>
+    <header class="bar">
+      <h1>Super POPO Land</h1>
+      <button id="mute" type="button" class="chip">🔊 音オン</button>
+    </header>
+    <div class="screen">
+      <canvas id="game" width="384" height="224" aria-label="Super POPO Land ゲーム画面"></canvas>
+    </div>
+
+    <div id="touch" class="pad" aria-hidden="true">
+      <div class="dpad">
+        <span data-btn="left" class="b left">◀</span>
+        <span data-btn="down" class="b down">▼</span>
+        <span data-btn="right" class="b right">▶</span>
+      </div>
+      <span data-btn="start" class="b start">II</span>
+      <div class="ab">
+        <span data-btn="run" class="b run">B</span>
+        <span data-btn="jump" class="b jump">A</span>
+      </div>
+    </div>
+
+    <section class="help">
+      <h2>あそびかた</h2>
+      <ul>
+        <li><kbd>←</kbd><kbd>→</kbd> 移動 ／ <kbd>↓</kbd> しゃがむ（せまいトンネルはしゃがんで進もう）</li>
+        <li><kbd>Space</kbd> / <kbd>Z</kbd> ジャンプ（長押しで高くとぶ）</li>
+        <li><kbd>X</kbd> / <kbd>Shift</kbd> ダッシュ ／ <kbd>Enter</kbd> ポーズ ／ <kbd>M</kbd> 音のオンオフ</li>
+        <li>ゲームパッド・スマホのタッチ操作にも対応</li>
+      </ul>
+      <h2>アイテムとてき</h2>
+      <ul>
+        <li><b>ポポベリー</b>（むらさきの実）… アンテナが金色になり、1 回だけダメージをふせぐ</li>
+        <li><b>スター</b> … しばらく無敵！さわった敵をやっつける</li>
+        <li><b>グミ</b>・<b>カラ</b>（甲羅はけれる）・<b>パタ</b> はふめる。<b>トゲ</b> はふめないので注意</li>
+        <li><b>UFO ステージ</b>（1-4）… UFO に乗って <kbd>Space</kbd> / <kbd>Z</kbd> / <kbd>X</kbd>（スマホは A / B）でショット！金色の UFO を撃つとアイテムが落ちてくる。最後はボス「キングトゲ」</li>
+        <li>コイン 100 枚で 1UP。全 5 ステージ（丘・洞窟・空・UFO・お城）</li>
+      </ul>
+    </section>
   </main>
-  <script src="./game.js"></script>
+
+  <script src="js/sprites.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/shooter.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>

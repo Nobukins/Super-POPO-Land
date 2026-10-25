@@ -1,38 +1,171 @@
 :root {
+  --bg: #1a1030;
+  --panel: #251a44;
+  --text: #f4ecff;
+  --muted: #b8a8d8;
+  --pink: #ff69b4;
+  --line: #3a2a60;
   color-scheme: dark;
-  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
 }
 
 body {
-  margin: 0;
-  background: linear-gradient(#8fd3ff, #4fa5ea);
-  color: #fff;
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .app {
-  max-width: 980px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 12px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 h1 {
-  margin: 0 0 0.25rem;
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  color: var(--pink);
 }
 
-.instructions {
-  margin: 0 0 0.75rem;
+.chip {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.screen {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 #game {
-  width: 100%;
-  max-width: 960px;
-  border: 3px solid #1d3354;
-  border-radius: 8px;
-  background: #80d2ff;
+  display: block;
   image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
+  border-radius: 6px;
+  box-shadow: 0 0 0 3px #000, 0 8px 30px rgba(0, 0, 0, 0.5);
+  touch-action: none;
 }
 
-.status {
-  margin: 0.75rem 0 0;
+.help {
+  width: 100%;
+  max-width: 768px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.help h2 {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin: 12px 0 4px;
+}
+
+.help ul { margin: 0; padding-left: 1.2em; }
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 0.35em;
+  margin: 0 0.1em;
+  text-align: center;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+}
+
+/* ---- タッチ操作 (タッチ端末のときだけ表示) ---- */
+.pad {
+  display: none;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 14px;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+body.is-touch .pad { display: flex; }
+body.is-touch .help { display: none; }
+
+.pad .b {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--line);
+  color: var(--text);
   font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.pad .b.on { background: var(--pink); color: #1a1030; }
+
+.dpad { display: flex; gap: 6px; align-items: flex-end; }
+.dpad .down { width: 52px; height: 52px; }
+.ab { display: flex; gap: 12px; align-items: flex-end; }
+.ab .jump { width: 76px; height: 76px; transform: translateY(-14px); }
+.pad .start { width: 44px; height: 44px; font-size: 0.8rem; border-radius: 12px; }
+
+@media (max-width: 440px) {
+  .pad .b { width: 52px; height: 52px; font-size: 1rem; }
+  .dpad { gap: 4px; }
+  .dpad .down { width: 44px; height: 44px; }
+  .ab { gap: 8px; }
+  .ab .jump { width: 62px; height: 62px; }
+  .pad .start { width: 36px; height: 36px; }
+}
+
+/* スマホ横向き: 画面いっぱいに表示してボタンを重ねる */
+@media (orientation: landscape) and (max-height: 500px) {
+  body.is-touch .app { padding: 8px; }
+  body.is-touch .bar { display: none; }
+  body.is-touch .pad {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    max-width: none;
+    margin: 0;
+    padding: 0 14px;
+    pointer-events: none;
+  }
+  body.is-touch .pad .b { pointer-events: auto; opacity: 0.6; }
 }
