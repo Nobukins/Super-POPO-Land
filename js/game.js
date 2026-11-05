@@ -1410,6 +1410,18 @@
   });
   Input.setupTouch(document.getElementById("touch"));
   if (matchMedia("(pointer: coarse)").matches) document.body.classList.add("is-touch");
+
+  // iPhone Safari はダブルタップやピンチで画面を拡大してしまうので止める
+  let lastTouchEnd = 0;
+  document.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd < 350 && !e.target.closest("a, button")) e.preventDefault();
+    lastTouchEnd = now;
+  }, { passive: false });
+  document.addEventListener("dblclick", (e) => e.preventDefault(), { passive: false });
+  for (const type of ["gesturestart", "gesturechange"]) {
+    document.addEventListener(type, (e) => e.preventDefault(), { passive: false });
+  }
   window.addEventListener("resize", fit);
   fit();
 
