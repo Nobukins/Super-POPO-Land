@@ -1394,8 +1394,20 @@
     const touch = document.body.classList.contains("is-touch");
     const landscape = touch && matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
     const top = wrap.getBoundingClientRect().top + window.scrollY;
-    const availH = landscape ? window.innerHeight - 16 : window.innerHeight - top - (touch ? 130 : 24);
-    let s = Math.min(availW / W, Math.max(availH, 160) / H);
+    let w = availW;
+    let availH = window.innerHeight - top - 24;
+    if (landscape) {
+      // 左の十字キーと右の A/B の間に収める
+      const left = document.querySelector(".dpad").getBoundingClientRect().right;
+      const right = document.querySelector(".ab").getBoundingClientRect().left;
+      w = Math.min(availW, right - left - 20);
+      availH = window.innerHeight - 16;
+    } else if (touch) {
+      // 下のボタンの分 (最低 260px) をあけておく
+      const pad = document.getElementById("touch");
+      availH = window.innerHeight - top - Math.max(260, pad.offsetHeight) - 8;
+    }
+    let s = Math.min(w / W, Math.max(availH, 160) / H);
     if (s >= 2) s = Math.floor(s);
     canvas.style.width = `${Math.floor(W * s)}px`;
     canvas.style.height = `${Math.floor(H * s)}px`;
@@ -1423,6 +1435,7 @@
     document.addEventListener(type, (e) => e.preventDefault(), { passive: false });
   }
   window.addEventListener("resize", fit);
+  window.addEventListener("orientationchange", () => setTimeout(fit, 250));
   fit();
 
   const muteBtn = document.getElementById("mute");
