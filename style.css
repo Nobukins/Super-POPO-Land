@@ -112,65 +112,129 @@ kbd {
 }
 
 /* ---- タッチ操作 (タッチ端末のときだけ表示) ---- */
+/* 縦向き: ゲームボーイのように画面の下に十字キーと A/B を置く */
+body.is-touch .app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: 0;
+}
+body.is-touch .help { display: none; }
+
 .pad {
   display: none;
-  width: 100%;
-  max-width: 640px;
-  margin-top: 14px;
-  justify-content: space-between;
-  align-items: center;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
+  --cell: 52px;
+  --round: 66px;
 }
 
-body.is-touch .pad { display: flex; }
-body.is-touch .help { display: none; }
+body.is-touch .pad {
+  display: grid;
+  width: 100%;
+  max-width: 440px;
+  margin-top: auto;
+  padding: 40px 4px max(28px, env(safe-area-inset-bottom));
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "dpad . ab"
+    "sys sys sys";
+  align-items: center;
+  row-gap: 26px;
+}
 
 .pad .b {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
   background: var(--panel);
   border: 2px solid var(--line);
   color: var(--text);
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
-
 .pad .b.on { background: var(--pink); color: #1a1030; }
 
-.dpad { display: flex; gap: 6px; align-items: flex-end; }
-.dpad .down { width: 52px; height: 52px; }
-.ab { display: flex; gap: 12px; align-items: flex-end; }
-.ab .jump { width: 76px; height: 76px; transform: translateY(-14px); }
-.pad .start { width: 44px; height: 44px; font-size: 0.8rem; border-radius: 12px; }
+/* 十字キー */
+.dpad {
+  grid-area: dpad;
+  display: grid;
+  grid-template-columns: repeat(3, var(--cell));
+  grid-template-rows: repeat(3, var(--cell));
+  grid-template-areas:
+    ". up ."
+    "left hub right"
+    ". down .";
+}
+.dpad .b { border-radius: 8px; }
+.dpad .up { grid-area: up; border-bottom: 0; border-radius: 8px 8px 0 0; }
+.dpad .down { grid-area: down; border-top: 0; border-radius: 0 0 8px 8px; }
+.dpad .left { grid-area: left; border-right: 0; border-radius: 8px 0 0 8px; }
+.dpad .right { grid-area: right; border-left: 0; border-radius: 0 8px 8px 0; }
+.dpad .hub { grid-area: hub; background: var(--panel); border-block: 2px solid var(--line); }
 
-@media (max-width: 440px) {
-  .pad .b { width: 52px; height: 52px; font-size: 1rem; }
-  .dpad { gap: 4px; }
-  .dpad .down { width: 44px; height: 44px; }
-  .ab { gap: 8px; }
-  .ab .jump { width: 62px; height: 62px; }
-  .pad .start { width: 36px; height: 36px; }
+/* A/B はゲームボーイと同じく斜めに並べる */
+.ab {
+  grid-area: ab;
+  position: relative;
+  width: calc(var(--round) * 2 + 14px);
+  height: calc(var(--round) * 1.7);
+}
+.ab .b { position: absolute; width: var(--round); height: var(--round); border-radius: 50%; font-size: 1.3rem; }
+.ab .run { left: 0; bottom: 0; }
+.ab .jump { right: 0; top: 0; }
+
+.sys { grid-area: sys; display: flex; justify-content: center; }
+.pad .start {
+  width: 76px;
+  height: 26px;
+  border-radius: 13px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
 }
 
-/* スマホ横向き: 画面いっぱいに表示してボタンを重ねる */
+@media (max-width: 370px) {
+  .pad { --cell: 46px; --round: 58px; }
+}
+
+/* 横向き: Switch のように画面の左右に十字キーと A/B を置く */
 @media (orientation: landscape) and (max-height: 500px) {
-  body.is-touch .app { padding: 8px; }
+  body.is-touch .app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 8px 0;
+    justify-content: center;
+  }
   body.is-touch .bar { display: none; }
   body.is-touch .pad {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 10px;
+    inset: 0;
+    display: block;
     max-width: none;
     margin: 0;
-    padding: 0 14px;
+    padding: 0;
     pointer-events: none;
+    --cell: 46px;
+    --round: 60px;
   }
-  body.is-touch .pad .b { pointer-events: auto; opacity: 0.6; }
+  body.is-touch .pad .b,
+  body.is-touch .pad .hub { pointer-events: auto; }
+  body.is-touch .dpad {
+    position: absolute;
+    left: max(18px, env(safe-area-inset-left));
+    top: 50%;
+    transform: translateY(-40%);
+  }
+  body.is-touch .ab {
+    position: absolute;
+    right: max(18px, env(safe-area-inset-right));
+    top: 50%;
+    transform: translateY(-40%);
+  }
+  body.is-touch .sys {
+    position: absolute;
+    right: max(18px, env(safe-area-inset-right));
+    top: max(14px, env(safe-area-inset-top));
+  }
 }
