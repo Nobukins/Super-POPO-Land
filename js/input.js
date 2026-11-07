@@ -35,46 +35,77 @@
     const b = KEYMAP[e.code];
     if (b) keyState[b] = false;
   });
-  window.addEventListener("blur", () => {
-    BUTTONS.forEach((b) => { keyState[b] = false; touchState[b] = false; });
-  });
+  // ---- タッチボタン
+  // iPhone では指を離したイベント (pointerup) が届かないことがあり、ボタンが押しっぱなしになる。
+  // そこでタッチ操作は「いま画面に触れている指の一覧 (e.touches)」から毎回作り直す。
+  // どれか 1 本でも指が動いたり離れたりすれば、取りこぼした分も自動で元に戻る。
+  let padRoot = null;
+  const mouse = new Map(); // パソコンでマウスクリックしたとき用 (pointerId → ボタン)
 
-  // ---- タッチ: ボタン上を指でスライドしても追従するように pointer ごとに判定
-  const pointers = new Map();
+  function buttonsAt(x, y) {
+    const el = document.elementFromPoint(x, y);
+    const btn = el && el.closest ? el.closest("[data-btn]") : null;
+    return btn && padRoot && padRoot.contains(btn) ? btn.dataset.btn.split(" ") : [];
+  }
+
+  function applyTouch(active) {
+    for (const b of BUTTONS) {
+      if (active.has(b) && !touchState[b]) tapped[b] = true;
+      touchState[b] = active.has(b);
+    }
+    if (!padRoot) return;
+    padRoot.querySelectorAll("[data-btn]").forEach((el) => {
+      el.classList.toggle("on", el.dataset.btn.split(" ").every((n) => touchState[n]));
+    });
+  }
+
+  function syncTouches(touchList) {
+    const active = new Set();
+    for (const t of touchList) buttonsAt(t.clientX, t.clientY).forEach((b) => active.add(b));
+    for (const btns of mouse.values()) btns.forEach((b) => active.add(b));
+    applyTouch(active);
+  }
+
+  function releaseAll() {
+    BUTTONS.forEach((b) => { keyState[b] = false; });
+    mouse.clear();
+    applyTouch(new Set());
+  }
+
+  window.addEventListener("blur", releaseAll);
+  window.addEventListener("pagehide", releaseAll);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) releaseAll(); });
+
   function setupTouch(root) {
     if (!root) return;
-    const recompute = () => {
-      BUTTONS.forEach((b) => { touchState[b] = false; });
-      for (const btns of pointers.values()) btns.forEach((b) => { touchState[b] = true; });
-      root.querySelectorAll("[data-btn]").forEach((el) => {
-        const names = el.dataset.btn.split(" ");
-        el.classList.toggle("on", names.every((n) => touchState[n]));
-      });
-    };
-    const hit = (e) => {
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      const btn = el && el.closest ? el.closest("[data-btn]") : null;
-      return btn ? btn.dataset.btn.split(" ") : [];
-    };
+    padRoot = root;
+    for (const type of ["touchstart", "touchmove", "touchend", "touchcancel"]) {
+      document.addEventListener(type, (e) => {
+        syncTouches(e.touches);
+        if (type === "touchstart") listeners.forEach((fn) => fn("any"));
+        // ボタンの上ではスクロールや拡大をさせない
+        if (root.contains(e.target) && e.cancelable) e.preventDefault();
+      }, { passive: false });
+    }
+    // マウス (パソコン) で押したときだけ pointer イベントを使う
     root.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse") return;
       e.preventDefault();
-      try { root.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer */ }
-      pointers.set(e.pointerId, hit(e));
-      pointers.get(e.pointerId).forEach((b) => { tapped[b] = true; });
-      recompute();
+      mouse.set(e.pointerId, buttonsAt(e.clientX, e.clientY));
+      syncTouches([]);
       listeners.forEach((fn) => fn("any"));
     });
-    root.addEventListener("pointermove", (e) => {
-      if (!pointers.has(e.pointerId)) return;
-      pointers.set(e.pointerId, hit(e));
-      recompute();
+    window.addEventListener("pointermove", (e) => {
+      if (!mouse.has(e.pointerId)) return;
+      mouse.set(e.pointerId, buttonsAt(e.clientX, e.clientY));
+      syncTouches([]);
     });
     const end = (e) => {
-      pointers.delete(e.pointerId);
-      recompute();
+      if (!mouse.delete(e.pointerId)) return;
+      syncTouches([]);
     };
-    root.addEventListener("pointerup", end);
-    root.addEventListener("pointercancel", end);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
     root.addEventListener("contextmenu", (e) => e.preventDefault());
   }
 
