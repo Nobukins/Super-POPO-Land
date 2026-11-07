@@ -28,6 +28,9 @@ jobs:
           mkdir -p _site
           cp -r index.html style.css js assets _site/
           python3 tools/build_single.py _site/super-popo-land.html
+          # 古い CSS/JS がブラウザに残って新しい HTML と混ざらないよう、版番号を付ける
+          sed -i -E "s#(href=\"style\.css|src=\"js/[a-z]+\.js)\"#\1?v=${GITHUB_SHA::8}\"#g" _site/index.html
+          grep -E "style\.css|js/" _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
